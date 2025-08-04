@@ -51,10 +51,12 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
+  console.log("Dashboard rendered for:", familyName);
+  
   return (
-    <div className="min-h-screen bg-gradient-warm">
+    <div className="min-h-screen bg-gradient-to-br from-accent to-muted">
       {/* Header */}
-      <div className="bg-gradient-primary shadow-soft">
+      <div className="bg-gradient-to-r from-primary to-primary-dark shadow-soft">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -144,7 +146,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                 <CardContent className="space-y-4">
                   <Button 
                     onClick={() => setShowIncomeForm(true)}
-                    className="w-full bg-gradient-primary hover:opacity-90"
+                    className="w-full bg-gradient-to-r from-primary to-primary-dark hover:opacity-90"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Renda

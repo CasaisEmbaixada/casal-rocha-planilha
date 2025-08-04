@@ -7,6 +7,8 @@ const Index = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [familyName, setFamilyName] = useState<string>("");
 
+  console.log("Index component rendered - isLoggedIn:", isLoggedIn);
+
   const handleLogin = (email: string, password: string) => {
     // Simulação de login - em produção, isso seria feito via Supabase
     console.log("Login attempt:", { email, password });

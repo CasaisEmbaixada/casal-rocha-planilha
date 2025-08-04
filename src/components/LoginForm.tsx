@@ -27,13 +27,15 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
     onLogin(email, password);
   };
 
+  console.log("LoginForm rendered");
+  
   return (
-    <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-accent to-muted flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <Heart className="h-8 w-8 text-primary fill-primary" />
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               Casais na Rocha
             </h1>
           </div>
@@ -116,7 +118,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-primary hover:opacity-90 transition-all duration-300"
+              className="w-full bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 transition-all duration-300"
             >
               {isLoginMode ? "Entrar" : "Criar Conta"}
             </Button>

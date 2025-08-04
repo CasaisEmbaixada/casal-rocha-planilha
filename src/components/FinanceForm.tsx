@@ -163,7 +163,7 @@ export const FinanceForm = ({ type, onSubmit, onClose }: FinanceFormProps) => {
             </Button>
             <Button 
               type="submit" 
-              className="bg-gradient-primary hover:opacity-90"
+              className="bg-gradient-to-r from-primary to-primary-dark hover:opacity-90"
             >
               Salvar
             </Button>
