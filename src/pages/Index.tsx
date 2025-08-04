@@ -1,13 +1,38 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { LoginForm } from "@/components/LoginForm";
+import { Dashboard } from "@/components/Dashboard";
 
 const Index = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [familyName, setFamilyName] = useState<string>("");
+
+  const handleLogin = (email: string, password: string) => {
+    // Simulação de login - em produção, isso seria feito via Supabase
+    console.log("Login attempt:", { email, password });
+    setFamilyName("Família Silva"); // Mockado por enquanto
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setFamilyName("");
+  };
+
+  const toggleMode = () => {
+    setIsLoginMode(!isLoginMode);
+  };
+
+  if (isLoggedIn) {
+    return <Dashboard onLogout={handleLogout} familyName={familyName} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <LoginForm 
+      onLogin={handleLogin} 
+      onToggleMode={toggleMode}
+      isLoginMode={isLoginMode}
+    />
   );
 };
 
