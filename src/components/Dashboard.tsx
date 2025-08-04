@@ -6,6 +6,7 @@ import { Heart, Plus, Minus, TrendingUp, Target, FileText, LogOut } from "lucide
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
+import { GoalsSection } from "./GoalsSection";
 
 interface Transaction {
   id: string;
@@ -80,10 +81,14 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-fit lg:grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3 lg:w-fit lg:grid-cols-3">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4" />
               <span>Painel</span>
+            </TabsTrigger>
+            <TabsTrigger value="goals" className="flex items-center space-x-2">
+              <Target className="h-4 w-4" />
+              <span>Metas</span>
             </TabsTrigger>
             <TabsTrigger value="notes" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
@@ -223,6 +228,10 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="goals">
+            <GoalsSection />
           </TabsContent>
 
           <TabsContent value="notes">

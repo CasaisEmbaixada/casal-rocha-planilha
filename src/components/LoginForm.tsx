@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Heart, Eye, EyeOff } from "lucide-react";
 
 interface LoginFormProps {
-  onLogin: (email: string, password: string) => void;
+  onLogin: (email: string, password: string, familyName?: string) => void;
   onToggleMode: () => void;
   isLoginMode: boolean;
 }
@@ -24,7 +24,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
       alert("As senhas não coincidem!");
       return;
     }
-    onLogin(email, password);
+    onLogin(email, password, familyName);
   };
 
   console.log("LoginForm rendered");
@@ -35,9 +35,11 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <Heart className="h-8 w-8 text-primary fill-primary" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-              Casais na Rocha
-            </h1>
+            <img 
+              src="/lovable-uploads/5d1f9008-15f4-4aba-8127-092469e48f87.png" 
+              alt="Casais na Rocha" 
+              className="h-12 w-auto object-contain"
+            />
           </div>
           <div>
             <CardTitle className="text-xl text-foreground">
