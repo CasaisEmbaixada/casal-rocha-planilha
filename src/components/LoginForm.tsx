@@ -51,6 +51,11 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                 : "Comece a gerenciar as finanças do casal"
               }
             </CardDescription>
+            <div className="mt-4 p-3 bg-primary/10 rounded-md border border-primary/20">
+              <p className="text-primary font-medium text-center italic">
+                "Onde há acordo a prosperidade!"
+              </p>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
