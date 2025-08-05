@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Target, Trash2, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Goal {
   id: string;
@@ -21,6 +23,7 @@ interface Goal {
 export const GoalsSection = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [showGoalForm, setShowGoalForm] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -28,6 +31,45 @@ export const GoalsSection = () => {
     description: "",
     targetDate: ""
   });
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadGoals();
+  }, []);
+
+  const loadGoals = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('goals')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedGoals = data?.map(goal => ({
+        id: goal.id,
+        title: goal.title,
+        category: goal.category,
+        targetAmount: Number(goal.target_amount),
+        currentAmount: Number(goal.current_amount),
+        description: goal.description || '',
+        targetDate: goal.target_date || '',
+        completed: goal.completed
+      })) || [];
+
+      setGoals(formattedGoals);
+    } catch (error: any) {
+      console.error('Error loading goals:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as metas",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     "Casa",
@@ -39,45 +81,130 @@ export const GoalsSection = () => {
     "Outros"
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newGoal: Goal = {
-      id: Date.now().toString(),
-      title: formData.title,
-      category: formData.category,
-      targetAmount: parseFloat(formData.targetAmount),
-      currentAmount: 0,
-      description: formData.description,
-      targetDate: formData.targetDate,
-      completed: false
-    };
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        throw new Error('Usuário não autenticado');
+      }
 
-    setGoals([...goals, newGoal]);
-    setFormData({
-      title: "",
-      category: "",
-      targetAmount: "",
-      description: "",
-      targetDate: ""
-    });
-    setShowGoalForm(false);
+      const { data, error } = await supabase
+        .from('goals')
+        .insert({
+          user_id: user.data.user.id,
+          title: formData.title,
+          category: formData.category,
+          target_amount: parseFloat(formData.targetAmount),
+          description: formData.description,
+          target_date: formData.targetDate || null
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newGoal: Goal = {
+        id: data.id,
+        title: data.title,
+        category: data.category,
+        targetAmount: Number(data.target_amount),
+        currentAmount: Number(data.current_amount),
+        description: data.description || '',
+        targetDate: data.target_date || '',
+        completed: data.completed
+      };
+
+      setGoals([newGoal, ...goals]);
+      setFormData({
+        title: "",
+        category: "",
+        targetAmount: "",
+        description: "",
+        targetDate: ""
+      });
+      setShowGoalForm(false);
+      
+      toast({
+        title: "Sucesso",
+        description: "Meta criada com sucesso!"
+      });
+    } catch (error: any) {
+      console.error('Error creating goal:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar a meta",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updateGoalProgress = (goalId: string, amount: number) => {
-    setGoals(goals.map(goal => 
-      goal.id === goalId 
-        ? { 
-            ...goal, 
-            currentAmount: Math.min(amount, goal.targetAmount),
-            completed: amount >= goal.targetAmount
-          }
-        : goal
-    ));
+  const updateGoalProgress = async (goalId: string, amount: number) => {
+    try {
+      const goal = goals.find(g => g.id === goalId);
+      if (!goal) return;
+
+      const newAmount = Math.min(amount, goal.targetAmount);
+      const isCompleted = newAmount >= goal.targetAmount;
+
+      const { error } = await supabase
+        .from('goals')
+        .update({
+          current_amount: newAmount,
+          completed: isCompleted
+        })
+        .eq('id', goalId);
+
+      if (error) throw error;
+
+      setGoals(goals.map(goal => 
+        goal.id === goalId 
+          ? { 
+              ...goal, 
+              currentAmount: newAmount,
+              completed: isCompleted
+            }
+          : goal
+      ));
+
+      toast({
+        title: "Sucesso",
+        description: isCompleted ? "Meta concluída! 🎉" : "Progresso atualizado!"
+      });
+    } catch (error: any) {
+      console.error('Error updating goal:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a meta",
+        variant: "destructive"
+      });
+    }
   };
 
-  const deleteGoal = (goalId: string) => {
-    setGoals(goals.filter(goal => goal.id !== goalId));
+  const deleteGoal = async (goalId: string) => {
+    try {
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', goalId);
+
+      if (error) throw error;
+
+      setGoals(goals.filter(goal => goal.id !== goalId));
+      
+      toast({
+        title: "Sucesso",
+        description: "Meta removida com sucesso!"
+      });
+    } catch (error: any) {
+      console.error('Error deleting goal:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a meta",
+        variant: "destructive"
+      });
+    }
   };
 
   const getProgressPercentage = (current: number, target: number) => {

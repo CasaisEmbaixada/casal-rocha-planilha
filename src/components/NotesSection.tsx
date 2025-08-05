@@ -3,32 +3,106 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Save, Edit3 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const NotesSection = () => {
   const [notes, setNotes] = useState("");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [noteId, setNoteId] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  // Carrega as notas do localStorage ao montar o componente
+  // Carrega as notas do Supabase ao montar o componente
   useEffect(() => {
-    const savedNotes = localStorage.getItem('financialNotes');
-    if (savedNotes) {
-      setNotes(savedNotes);
-    }
+    loadNotes();
   }, []);
+
+  const loadNotes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error loading notes:', error);
+        return;
+      }
+
+      if (data) {
+        setNotes(data.content || '');
+        setNoteId(data.id);
+        setLastSaved(new Date(data.updated_at));
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
+    }
+  };
 
   // Auto-save das notas
   useEffect(() => {
     if (notes.trim() && isEditing) {
       const timeoutId = setTimeout(() => {
-        localStorage.setItem('financialNotes', notes);
-        setLastSaved(new Date());
-        setIsEditing(false);
+        saveNotes();
       }, 2000); // Salva após 2 segundos de inatividade
 
       return () => clearTimeout(timeoutId);
     }
   }, [notes, isEditing]);
+
+  const saveNotes = async () => {
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        toast({
+          title: "Erro",
+          description: "Usuário não autenticado",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (noteId) {
+        // Atualiza nota existente
+        const { error } = await supabase
+          .from('notes')
+          .update({
+            content: notes,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', noteId);
+
+        if (error) throw error;
+      } else {
+        // Cria nova nota
+        const { data, error } = await supabase
+          .from('notes')
+          .insert({
+            user_id: user.data.user.id,
+            title: 'Anotações Financeiras',
+            content: notes
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        setNoteId(data.id);
+      }
+
+      setLastSaved(new Date());
+      setIsEditing(false);
+    } catch (error: any) {
+      console.error('Error saving notes:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar as anotações",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleNotesChange = (value: string) => {
     setNotes(value);

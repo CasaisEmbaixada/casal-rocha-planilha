@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +7,8 @@ import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
 import { GoalsSection } from "./GoalsSection";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Transaction {
   id: string;
@@ -27,15 +29,92 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction = {
-      ...transaction,
-      id: Date.now().toString(),
-    };
-    setTransactions([...transactions, newTransaction]);
-    setShowIncomeForm(false);
-    setShowExpenseForm(false);
+  useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  const loadTransactions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedTransactions = data?.map(transaction => ({
+        id: transaction.id,
+        type: transaction.type as 'income' | 'expense',
+        amount: Number(transaction.amount),
+        category: transaction.category,
+        description: transaction.description || '',
+        date: transaction.date
+      })) || [];
+
+      setTransactions(formattedTransactions);
+    } catch (error: any) {
+      console.error('Error loading transactions:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as transações",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: user.data.user.id,
+          type: transaction.type,
+          amount: transaction.amount,
+          category: transaction.category,
+          description: transaction.description,
+          date: transaction.date
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newTransaction = {
+        id: data.id,
+        type: data.type as 'income' | 'expense',
+        amount: Number(data.amount),
+        category: data.category,
+        description: data.description || '',
+        date: data.date
+      };
+
+      setTransactions([newTransaction, ...transactions]);
+      setShowIncomeForm(false);
+      setShowExpenseForm(false);
+      
+      toast({
+        title: "Sucesso",
+        description: `${transaction.type === 'income' ? 'Renda' : 'Despesa'} adicionada com sucesso!`
+      });
+    } catch (error: any) {
+      console.error('Error adding transaction:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar a transação",
+        variant: "destructive"
+      });
+    }
   };
 
   const totalIncome = transactions

@@ -11,6 +11,26 @@ const Index = () => {
   const [familyName, setFamilyName] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
+  const fetchFamilyName = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('family_name')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        setFamilyName("Família Silva");
+      } else if (data) {
+        setFamilyName(data.family_name);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setFamilyName("Família Silva");
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -19,11 +39,8 @@ const Index = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch family name from user metadata or profile
-          const savedFamilyName = localStorage.getItem('familyName') || 
-                                 session.user.user_metadata?.family_name || 
-                                 "Família Silva";
-          setFamilyName(savedFamilyName);
+          // Fetch family name from profiles table
+          fetchFamilyName(session.user.id);
         } else {
           setFamilyName("");
         }
@@ -31,18 +48,17 @@ const Index = () => {
       }
     );
 
+
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const savedFamilyName = localStorage.getItem('familyName') || 
-                               session.user.user_metadata?.family_name || 
-                               "Família Silva";
-        setFamilyName(savedFamilyName);
+        fetchFamilyName(session.user.id);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -62,10 +78,7 @@ const Index = () => {
         if (error) throw error;
         
         if (data.user) {
-          const savedFamilyName = localStorage.getItem('familyName') || 
-                                 data.user.user_metadata?.family_name || 
-                                 "Família Silva";
-          setFamilyName(savedFamilyName);
+          fetchFamilyName(data.user.id);
         }
       } else {
         // Signup
@@ -82,10 +95,7 @@ const Index = () => {
         
         if (error) throw error;
         
-        if (inputFamilyName) {
-          setFamilyName(inputFamilyName);
-          localStorage.setItem('familyName', inputFamilyName);
-        }
+        // Family name will be set automatically by the trigger
       }
     } catch (error: any) {
       console.error('Auth error:', error);
@@ -103,7 +113,6 @@ const Index = () => {
       setUser(null);
       setSession(null);
       setFamilyName("");
-      localStorage.removeItem('familyName');
     } catch (error: any) {
       console.error('Logout error:', error);
     }
