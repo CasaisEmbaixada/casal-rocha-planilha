@@ -99,7 +99,20 @@ const Index = () => {
       }
     } catch (error: any) {
       console.error('Auth error:', error);
-      alert(error.message);
+      
+      // Mensagens de erro mais amigáveis
+      let errorMessage = "Erro ao fazer login";
+      if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Verifique seu email e clique no link de confirmação";
+      } else if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Email ou senha incorretos";
+      } else if (error.message.includes("User already registered")) {
+        errorMessage = "Este email já está cadastrado. Tente fazer login";
+      } else if (error.message.includes("Password")) {
+        errorMessage = "A senha deve ter pelo menos 6 caracteres";
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

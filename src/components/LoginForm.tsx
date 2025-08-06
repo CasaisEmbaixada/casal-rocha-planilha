@@ -146,9 +146,9 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
 
           {isLoginMode && (
             <div className="mt-2 text-center">
-              <Button variant="link" className="text-sm text-muted-foreground">
-                Esqueceu sua senha?
-              </Button>
+              <p className="text-xs text-muted-foreground">
+                Problemas para entrar? Entre em contato conosco
+              </p>
             </div>
           )}
         </CardContent>
