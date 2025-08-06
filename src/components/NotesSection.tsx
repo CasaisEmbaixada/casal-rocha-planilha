@@ -44,7 +44,7 @@ export const NotesSection = () => {
 
   // Auto-save das notas
   useEffect(() => {
-    if (notes.trim() && isEditing) {
+    if (isEditing) {
       const timeoutId = setTimeout(() => {
         saveNotes();
       }, 2000); // Salva após 2 segundos de inatividade

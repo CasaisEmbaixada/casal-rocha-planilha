@@ -367,27 +367,47 @@ export const GoalsSection = () => {
 
                 {!goal.completed && (
                   <div className="flex space-x-2">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Valor a adicionar"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          const value = parseFloat((e.target as HTMLInputElement).value);
-                          if (value > 0) {
-                            updateGoalProgress(goal.id, goal.currentAmount + value);
-                            (e.target as HTMLInputElement).value = '';
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                        R$
+                      </span>
+                      <Input
+                        type="text"
+                        placeholder="0,00"
+                        className="pl-10"
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const numericValue = value.replace(/[^\d]/g, '');
+                          if (numericValue) {
+                            const formattedValue = parseFloat(numericValue) / 100;
+                            e.target.value = formattedValue.toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            });
+                          } else {
+                            e.target.value = '';
                           }
-                        }
-                      }}
-                    />
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            const value = (e.target as HTMLInputElement).value;
+                            const numericValue = parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.'));
+                            if (numericValue > 0) {
+                              updateGoalProgress(goal.id, goal.currentAmount + numericValue);
+                              (e.target as HTMLInputElement).value = '';
+                            }
+                          }
+                        }}
+                      />
+                    </div>
                     <Button
                       size="sm"
                       onClick={(e) => {
-                        const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                        const value = parseFloat(input.value);
-                        if (value > 0) {
-                          updateGoalProgress(goal.id, goal.currentAmount + value);
+                        const input = e.currentTarget.previousElementSibling?.querySelector('input') as HTMLInputElement;
+                        const value = input.value;
+                        const numericValue = parseFloat(value.replace(/[^\d,]/g, '').replace(',', '.'));
+                        if (numericValue > 0) {
+                          updateGoalProgress(goal.id, goal.currentAmount + numericValue);
                           input.value = '';
                         }
                       }}
