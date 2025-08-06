@@ -3,7 +3,6 @@ import { LoginForm } from "@/components/LoginForm";
 import { Dashboard } from "@/components/Dashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
-import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -95,13 +94,6 @@ const Index = () => {
         });
         
         if (error) throw error;
-        
-        // Show success message about email verification
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Verifique seu email para confirmar sua conta. Após a confirmação, você poderá fazer login.",
-          duration: 6000,
-        });
         
         // Family name will be set automatically by the trigger
       }
