@@ -30,20 +30,19 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
   console.log("LoginForm rendered");
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-muted flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl flex items-center gap-8">
-        {/* Hero Image */}
-        <div className="hidden lg:flex flex-1 items-center justify-center">
-          <img 
-            src="/lovable-uploads/0022408e-8418-4498-9739-41e9ef3cd7f7.png" 
-            alt="Casal gerenciando finanças juntos" 
-            className="w-full h-auto max-w-lg object-contain"
-          />
-        </div>
-        
-        {/* Login Card */}
-        <div className="flex-1 max-w-md">
-          <Card className="w-full shadow-elegant">
+    <div className="min-h-screen bg-gradient-to-br from-accent to-muted flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Hero Image */}
+      <div className="absolute inset-0 hidden lg:block">
+        <img 
+          src="/lovable-uploads/0022408e-8418-4498-9739-41e9ef3cd7f7.png" 
+          alt="Casal gerenciando finanças juntos" 
+          className="w-full h-full object-cover opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/80 to-muted/80"></div>
+      </div>
+      
+      {/* Login Card */}
+      <Card className="w-full max-w-md shadow-elegant relative z-10 backdrop-blur-sm bg-card/95">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <img 
@@ -169,8 +168,6 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
           )}
         </CardContent>
       </Card>
-        </div>
-      </div>
     </div>
   );
 };
