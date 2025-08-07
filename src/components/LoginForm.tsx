@@ -34,7 +34,11 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
-            <Heart className="h-8 w-8 text-primary fill-primary" />
+            <img 
+              src="/lovable-uploads/107e1544-50c2-4374-ad68-a2e434641c4e.png" 
+              alt="Favicon" 
+              className="h-8 w-8 object-contain"
+            />
             <img 
               src="/lovable-uploads/5d1f9008-15f4-4aba-8127-092469e48f87.png" 
               alt="Casais na Rocha" 

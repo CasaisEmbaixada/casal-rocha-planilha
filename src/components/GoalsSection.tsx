@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Target, Trash2, CheckCircle } from "lucide-react";
+import { Target, Trash2, CheckCircle, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,6 +23,7 @@ interface Goal {
 export const GoalsSection = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [showGoalForm, setShowGoalForm] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -90,33 +91,76 @@ export const GoalsSection = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      const { data, error } = await supabase
-        .from('goals')
-        .insert({
-          user_id: user.data.user.id,
-          title: formData.title,
-          category: formData.category,
-          target_amount: parseFloat(formData.targetAmount),
-          description: formData.description,
-          target_date: formData.targetDate || null
-        })
-        .select()
-        .single();
+      if (editingGoal) {
+        // Atualizar meta existente
+        const { data, error } = await supabase
+          .from('goals')
+          .update({
+            title: formData.title,
+            category: formData.category,
+            target_amount: parseFloat(formData.targetAmount.replace(/[^\d,]/g, '').replace(',', '.')),
+            description: formData.description,
+            target_date: formData.targetDate || null
+          })
+          .eq('id', editingGoal.id)
+          .select()
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const newGoal: Goal = {
-        id: data.id,
-        title: data.title,
-        category: data.category,
-        targetAmount: Number(data.target_amount),
-        currentAmount: Number(data.current_amount),
-        description: data.description || '',
-        targetDate: data.target_date || '',
-        completed: data.completed
-      };
+        const updatedGoal: Goal = {
+          id: data.id,
+          title: data.title,
+          category: data.category,
+          targetAmount: Number(data.target_amount),
+          currentAmount: Number(data.current_amount),
+          description: data.description || '',
+          targetDate: data.target_date || '',
+          completed: data.completed
+        };
 
-      setGoals([newGoal, ...goals]);
+        setGoals(goals.map(goal => goal.id === editingGoal.id ? updatedGoal : goal));
+        
+        toast({
+          title: "Sucesso",
+          description: "Meta atualizada com sucesso!"
+        });
+      } else {
+        // Criar nova meta
+        const { data, error } = await supabase
+          .from('goals')
+          .insert({
+            user_id: user.data.user.id,
+            title: formData.title,
+            category: formData.category,
+            target_amount: parseFloat(formData.targetAmount.replace(/[^\d,]/g, '').replace(',', '.')),
+            description: formData.description,
+            target_date: formData.targetDate || null
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const newGoal: Goal = {
+          id: data.id,
+          title: data.title,
+          category: data.category,
+          targetAmount: Number(data.target_amount),
+          currentAmount: Number(data.current_amount),
+          description: data.description || '',
+          targetDate: data.target_date || '',
+          completed: data.completed
+        };
+
+        setGoals([newGoal, ...goals]);
+        
+        toast({
+          title: "Sucesso",
+          description: "Meta criada com sucesso!"
+        });
+      }
+
       setFormData({
         title: "",
         category: "",
@@ -125,19 +169,28 @@ export const GoalsSection = () => {
         targetDate: ""
       });
       setShowGoalForm(false);
+      setEditingGoal(null);
       
-      toast({
-        title: "Sucesso",
-        description: "Meta criada com sucesso!"
-      });
     } catch (error: any) {
-      console.error('Error creating goal:', error);
+      console.error('Error saving goal:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível criar a meta",
+        description: editingGoal ? "Não foi possível atualizar a meta" : "Não foi possível criar a meta",
         variant: "destructive"
       });
     }
+  };
+
+  const startEdit = (goal: Goal) => {
+    setEditingGoal(goal);
+    setFormData({
+      title: goal.title,
+      category: goal.category,
+      targetAmount: goal.targetAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+      description: goal.description,
+      targetDate: goal.targetDate
+    });
+    setShowGoalForm(true);
   };
 
   const updateGoalProgress = async (goalId: string, amount: number) => {
@@ -224,7 +277,19 @@ export const GoalsSection = () => {
               Defina e acompanhe seus objetivos financeiros
             </CardDescription>
           </div>
-          <Dialog open={showGoalForm} onOpenChange={setShowGoalForm}>
+          <Dialog open={showGoalForm} onOpenChange={(open) => {
+            setShowGoalForm(open);
+            if (!open) {
+              setEditingGoal(null);
+              setFormData({
+                title: "",
+                category: "",
+                targetAmount: "",
+                description: "",
+                targetDate: ""
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-to-r from-primary to-primary-dark hover:opacity-90">
                 Nova Meta
@@ -232,9 +297,9 @@ export const GoalsSection = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Criar Nova Meta</DialogTitle>
+                <DialogTitle>{editingGoal ? "Editar Meta" : "Criar Nova Meta"}</DialogTitle>
                 <DialogDescription>
-                  Defina um objetivo financeiro para sua família
+                  {editingGoal ? "Modifique os dados da sua meta" : "Defina um objetivo financeiro para sua família"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -267,15 +332,35 @@ export const GoalsSection = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="targetAmount">Valor Objetivo (R$)</Label>
-                  <Input
-                    id="targetAmount"
-                    type="number"
-                    step="0.01"
-                    placeholder="0,00"
-                    value={formData.targetAmount}
-                    onChange={(e) => setFormData({...formData, targetAmount: e.target.value})}
-                    required
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                      R$
+                    </span>
+                    <Input
+                      id="targetAmount"
+                      type="text"
+                      placeholder="0,00"
+                      className="pl-10"
+                      value={formData.targetAmount}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const numericValue = value.replace(/[^\d]/g, '');
+                        if (numericValue) {
+                          const formattedValue = parseFloat(numericValue) / 100;
+                          setFormData({
+                            ...formData, 
+                            targetAmount: formattedValue.toLocaleString('pt-BR', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })
+                          });
+                        } else {
+                          setFormData({...formData, targetAmount: ''});
+                        }
+                      }}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -308,7 +393,7 @@ export const GoalsSection = () => {
                     Cancelar
                   </Button>
                   <Button type="submit" className="bg-gradient-to-r from-primary to-primary-dark hover:opacity-90">
-                    Criar Meta
+                    {editingGoal ? "Atualizar Meta" : "Criar Meta"}
                   </Button>
                 </div>
               </form>
@@ -337,13 +422,22 @@ export const GoalsSection = () => {
                       <p className="text-sm text-muted-foreground">{goal.category}</p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteGoal(goal.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEdit(goal)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteGoal(goal.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

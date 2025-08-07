@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Plus, Minus, TrendingUp, Target, FileText, LogOut } from "lucide-react";
+import { Heart, Plus, Minus, TrendingUp, Target, FileText, LogOut, Download } from "lucide-react";
+import * as XLSX from 'xlsx';
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
@@ -130,6 +131,28 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   const recentTransactions = transactions
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
+
+  const exportToExcel = () => {
+    const exportData = transactions.map(transaction => ({
+      'Data': new Date(transaction.date).toLocaleDateString('pt-BR'),
+      'Tipo': transaction.type === 'income' ? 'Renda' : 'Despesa',
+      'Categoria': transaction.category,
+      'Descrição': transaction.description,
+      'Valor': transaction.amount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transações');
+    
+    const fileName = `financas_${familyName}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    toast({
+      title: "Sucesso",
+      description: "Dados exportados com sucesso!"
+    });
+  };
 
   console.log("Dashboard rendered for:", familyName);
   
@@ -262,10 +285,23 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
               {/* Transações Recentes */}
               <Card className="shadow-soft lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>Transações Recentes</CardTitle>
-                  <CardDescription>
-                    Suas últimas movimentações financeiras
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Transações Recentes</CardTitle>
+                      <CardDescription>
+                        Suas últimas movimentações financeiras
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      onClick={exportToExcel}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Exportar Excel</span>
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {recentTransactions.length === 0 ? (
