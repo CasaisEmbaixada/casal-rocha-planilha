@@ -31,7 +31,19 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-muted flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-elegant">
+      <div className="w-full max-w-4xl flex items-center gap-8">
+        {/* Hero Image */}
+        <div className="hidden lg:flex flex-1 items-center justify-center">
+          <img 
+            src="/lovable-uploads/0022408e-8418-4498-9739-41e9ef3cd7f7.png" 
+            alt="Casal gerenciando finanças juntos" 
+            className="w-full h-auto max-w-lg object-contain"
+          />
+        </div>
+        
+        {/* Login Card */}
+        <div className="flex-1 max-w-md">
+          <Card className="w-full shadow-elegant">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-2">
             <img 
@@ -157,6 +169,8 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
           )}
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 };
