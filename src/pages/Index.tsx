@@ -86,7 +86,6 @@ const Index = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
             data: {
               family_name: inputFamilyName
             }
