@@ -162,7 +162,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
           {isLoginMode && (
             <div className="mt-2 text-center">
   <p className="text-xs text-muted-foreground">
-    Feito com amor por{" "}
+    Feito com ❤️ por{" "}
     <a
       href="https://agencianooma.com.br"
       target="_blank"
@@ -173,6 +173,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
     </a>
   </p>
 </div>
+
 
           )}
         </CardContent>
