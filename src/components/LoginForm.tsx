@@ -161,10 +161,19 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
 
           {isLoginMode && (
             <div className="mt-2 text-center">
-              <p className="text-xs text-muted-foreground">
-                Problemas para entrar? Entre em contato conosco
-              </p>
-            </div>
+  <p className="text-xs text-muted-foreground">
+    Feito com amor por{" "}
+    <a
+      href="https://agencianooma.com.br"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline hover:text-primary"
+    >
+      Nooma
+    </a>
+  </p>
+</div>
+
           )}
         </CardContent>
       </Card>
