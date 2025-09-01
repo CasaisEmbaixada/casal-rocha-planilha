@@ -2,28 +2,26 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 interface MonthNavigatorProps {
   selectedMonth: Date;
   onMonthChange: (date: Date) => void;
+  selectedRange?: DateRange;
+  onRangeChange?: (range: DateRange | undefined) => void;
 }
 
-export const MonthNavigator = ({ selectedMonth, onMonthChange }: MonthNavigatorProps) => {
+export const MonthNavigator = ({ 
+  selectedMonth, 
+  onMonthChange, 
+  selectedRange, 
+  onRangeChange 
+}: MonthNavigatorProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    const newDate = new Date(selectedMonth);
-    if (direction === 'prev') {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else {
-      newDate.setMonth(newDate.getMonth() + 1);
-    }
-    onMonthChange(newDate);
-  };
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -32,51 +30,62 @@ export const MonthNavigator = ({ selectedMonth, onMonthChange }: MonthNavigatorP
     }
   };
 
-  return (
-    <div className="flex items-center justify-center space-x-4 mb-6">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigateMonth('prev')}
-        className="flex items-center space-x-2"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        <span className="hidden sm:inline">Anterior</span>
-      </Button>
+  const handleRangeSelect = (range: DateRange | undefined) => {
+    if (onRangeChange) {
+      onRangeChange(range);
+      if (range?.from) {
+        onMonthChange(range.from);
+      }
+    }
+  };
 
+  const getDisplayText = () => {
+    if (selectedRange?.from && selectedRange?.to) {
+      const fromFormatted = format(selectedRange.from, "dd/MM/yyyy", { locale: ptBR });
+      const toFormatted = format(selectedRange.to, "dd/MM/yyyy", { locale: ptBR });
+      return `${fromFormatted} - ${toFormatted}`;
+    } else if (selectedRange?.from) {
+      return format(selectedRange.from, "dd/MM/yyyy", { locale: ptBR });
+    }
+    return format(selectedMonth, "MMMM 'de' yyyy", { locale: ptBR });
+  };
+
+  return (
+    <div className="flex items-center justify-center mb-6">
       <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             className={cn(
-              "w-[200px] justify-center text-left font-normal",
+              "w-auto min-w-[250px] justify-center text-left font-normal",
               !selectedMonth && "text-muted-foreground"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {format(selectedMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+            {getDisplayText()}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="center">
-          <Calendar
-            mode="single"
-            selected={selectedMonth}
-            onSelect={handleDateSelect}
-            defaultMonth={selectedMonth}
-            className="pointer-events-auto"
-          />
+          {onRangeChange ? (
+            <Calendar
+              mode="range"
+              selected={selectedRange}
+              onSelect={handleRangeSelect}
+              defaultMonth={selectedMonth}
+              numberOfMonths={2}
+              className="pointer-events-auto"
+            />
+          ) : (
+            <Calendar
+              mode="single"
+              selected={selectedMonth}
+              onSelect={handleDateSelect}
+              defaultMonth={selectedMonth}
+              className="pointer-events-auto"
+            />
+          )}
         </PopoverContent>
       </Popover>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigateMonth('next')}
-        className="flex items-center space-x-2"
-      >
-        <span className="hidden sm:inline">Próximo</span>
-        <ChevronRight className="h-4 w-4" />
-      </Button>
     </div>
   );
 };

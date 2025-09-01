@@ -43,6 +43,13 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
     calculateAccumulatedBalance();
   }, [selectedMonth]);
 
+  // Recarregar dados quando trocar de aba
+  useEffect(() => {
+    if (activeTab === "dashboard") {
+      loadTransactions();
+    }
+  }, [activeTab]);
+
   const calculateAccumulatedBalance = async () => {
     try {
       const { data, error } = await supabase

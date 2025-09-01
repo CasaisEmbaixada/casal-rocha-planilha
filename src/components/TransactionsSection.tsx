@@ -33,6 +33,17 @@ export const TransactionsSection = ({ selectedMonth }: TransactionsSectionProps)
     loadTransactions();
   }, [selectedMonth]);
 
+  // Recarregar transações quando a seção for exibida
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadTransactions();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [selectedMonth]);
+
   const loadTransactions = async () => {
     try {
       setLoading(true);

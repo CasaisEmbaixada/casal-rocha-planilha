@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Calculator } from "lucide-react";
+import { Plus, Trash2, Calculator, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import * as XLSX from 'xlsx';
 
 interface PlanItem {
   id: string;
@@ -37,9 +39,89 @@ export const MonthlyPlanningSection = ({ selectedMonth }: MonthlyPlanningSection
     description: '',
     amount: ''
   });
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const addPlanItem = () => {
+  const monthYear = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
+
+  useEffect(() => {
+    loadPlanItems();
+  }, [selectedMonth]);
+
+  const loadPlanItems = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('monthly_planning')
+        .select('*')
+        .eq('month_year', monthYear)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedItems = data?.map(item => ({
+        id: item.id,
+        type: item.type as 'income' | 'expense',
+        category: item.category,
+        description: item.description || '',
+        amount: Number(item.amount)
+      })) || [];
+
+      setPlanItems(formattedItems);
+    } catch (error: any) {
+      console.error('Error loading planning items:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar o planejamento",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const savePlanItem = async (item: Omit<PlanItem, 'id'>) => {
+    try {
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { data, error } = await supabase
+        .from('monthly_planning')
+        .insert({
+          user_id: user.data.user.id,
+          month_year: monthYear,
+          type: item.type,
+          category: item.category,
+          description: item.description,
+          amount: item.amount
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const deletePlanItem = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('monthly_planning')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const addPlanItem = async () => {
     if (!newItem.category || !newItem.description || !newItem.amount) {
       toast({
         title: "Erro",
@@ -49,30 +131,62 @@ export const MonthlyPlanningSection = ({ selectedMonth }: MonthlyPlanningSection
       return;
     }
 
-    const item: PlanItem = {
-      id: Date.now().toString(),
-      type: newItem.type,
-      category: newItem.category,
-      description: newItem.description,
-      amount: parseFloat(newItem.amount.replace(',', '.'))
-    };
+    try {
+      const itemToSave = {
+        type: newItem.type,
+        category: newItem.category,
+        description: newItem.description,
+        amount: parseFloat(newItem.amount.replace(',', '.'))
+      };
 
-    setPlanItems([...planItems, item]);
-    setNewItem({
-      type: 'expense',
-      category: '',
-      description: '',
-      amount: ''
-    });
+      const savedItem = await savePlanItem(itemToSave);
 
-    toast({
-      title: "Sucesso",
-      description: "Item adicionado ao planejamento"
-    });
+      const newPlanItem: PlanItem = {
+        id: savedItem.id,
+        type: savedItem.type as 'income' | 'expense',
+        category: savedItem.category,
+        description: savedItem.description || '',
+        amount: Number(savedItem.amount)
+      };
+
+      setPlanItems([newPlanItem, ...planItems]);
+      setNewItem({
+        type: 'expense',
+        category: '',
+        description: '',
+        amount: ''
+      });
+
+      toast({
+        title: "Sucesso",
+        description: "Item adicionado ao planejamento"
+      });
+    } catch (error: any) {
+      console.error('Error adding plan item:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o item",
+        variant: "destructive"
+      });
+    }
   };
 
-  const removePlanItem = (id: string) => {
-    setPlanItems(planItems.filter(item => item.id !== id));
+  const removePlanItem = async (id: string) => {
+    try {
+      await deletePlanItem(id);
+      setPlanItems(planItems.filter(item => item.id !== id));
+      toast({
+        title: "Sucesso",
+        description: "Item removido do planejamento"
+      });
+    } catch (error: any) {
+      console.error('Error removing plan item:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o item",
+        variant: "destructive"
+      });
+    }
   };
 
   const formatCurrency = (value: string) => {
@@ -99,18 +213,54 @@ export const MonthlyPlanningSection = ({ selectedMonth }: MonthlyPlanningSection
   const incomeItems = planItems.filter(item => item.type === 'income');
   const expenseItems = planItems.filter(item => item.type === 'expense');
 
+  const exportToExcel = () => {
+    const exportData = planItems.map(item => ({
+      'Tipo': item.type === 'income' ? 'Receita' : 'Despesa',
+      'Categoria': item.category,
+      'Descrição': item.description,
+      'Valor': item.amount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Planejamento');
+    
+    const fileName = `planejamento_${selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(' ', '_')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    toast({
+      title: "Sucesso",
+      description: "Planejamento exportado com sucesso!"
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
       <Card className="shadow-soft">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Calculator className="h-5 w-5" />
-            <span>Planejamento para {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</span>
-          </CardTitle>
-          <CardDescription>
-            Planeje suas receitas e despesas para este mês. Estes dados não afetam seu painel principal.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center space-x-2">
+                <Calculator className="h-5 w-5" />
+                <span>Planejamento para {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</span>
+              </CardTitle>
+              <CardDescription>
+                Planeje suas receitas e despesas para este mês. Estes dados não afetam seu painel principal.
+              </CardDescription>
+            </div>
+            {planItems.length > 0 && (
+              <Button 
+                onClick={exportToExcel}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar Excel</span>
+              </Button>
+            )}
+          </div>
         </CardHeader>
       </Card>
 
