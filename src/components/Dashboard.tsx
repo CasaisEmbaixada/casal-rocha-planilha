@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Plus, Minus, TrendingUp, Target, FileText, LogOut, Download } from "lucide-react";
+import { Heart, Plus, Minus, TrendingUp, Target, FileText, LogOut, Download, Receipt, Calculator } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
 import { GoalsSection } from "./GoalsSection";
+import { TransactionsSection } from "./TransactionsSection";
+import { MonthlyPlanningSection } from "./MonthlyPlanningSection";
+import { MonthNavigator } from "./MonthNavigator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,18 +34,46 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [accumulatedBalance, setAccumulatedBalance] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
     loadTransactions();
-  }, []);
+    calculateAccumulatedBalance();
+  }, [selectedMonth]);
+
+  const calculateAccumulatedBalance = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .lt('date', new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1).toISOString().split('T')[0])
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+
+      const previousBalance = data?.reduce((acc, transaction) => {
+        return acc + (transaction.type === 'income' ? Number(transaction.amount) : -Number(transaction.amount));
+      }, 0) || 0;
+
+      setAccumulatedBalance(Math.max(0, previousBalance)); // Só acumula se positivo
+    } catch (error) {
+      console.error('Error calculating accumulated balance:', error);
+    }
+  };
 
   const loadTransactions = async () => {
     try {
       setLoading(true);
+      const startOfMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+      const endOfMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+      
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
+        .gte('date', startOfMonth.toISOString().split('T')[0])
+        .lte('date', endOfMonth.toISOString().split('T')[0])
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -126,7 +157,8 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const balance = totalIncome - totalExpenses;
+  const monthlyBalance = totalIncome - totalExpenses;
+  const totalBalance = accumulatedBalance + monthlyBalance;
 
   const recentTransactions = transactions
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -182,26 +214,40 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Navegador de Mês */}
+        <MonthNavigator 
+          selectedMonth={selectedMonth} 
+          onMonthChange={setSelectedMonth}
+        />
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-fit lg:grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4" />
-              <span>Painel</span>
+              <span className="hidden sm:inline">Painel</span>
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="flex items-center space-x-2">
+              <Receipt className="h-4 w-4" />
+              <span className="hidden sm:inline">Lançamentos</span>
+            </TabsTrigger>
+            <TabsTrigger value="planning" className="flex items-center space-x-2">
+              <Calculator className="h-4 w-4" />
+              <span className="hidden sm:inline">Planejamento</span>
             </TabsTrigger>
             <TabsTrigger value="goals" className="flex items-center space-x-2">
               <Target className="h-4 w-4" />
-              <span>Metas</span>
+              <span className="hidden sm:inline">Metas</span>
             </TabsTrigger>
             <TabsTrigger value="notes" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
-              <span>Anotações</span>
+              <span className="hidden sm:inline">Anotações</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
             {/* Resumo Financeiro */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="shadow-soft">
+                <Card className="shadow-soft">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Rendas do Mês
@@ -211,6 +257,9 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                   <div className="text-2xl font-bold text-success">
                     R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -224,19 +273,25 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                   <div className="text-2xl font-bold text-destructive">
                     R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                  </p>
                 </CardContent>
               </Card>
 
               <Card className="shadow-soft">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Saldo do Mês
+                    Saldo Total
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold ${balance >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <div className={`text-2xl font-bold ${totalBalance >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    R$ {totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Acumulado + Mês atual: R$ {monthlyBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -343,6 +398,14 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="transactions">
+            <TransactionsSection selectedMonth={selectedMonth} />
+          </TabsContent>
+
+          <TabsContent value="planning">
+            <MonthlyPlanningSection selectedMonth={selectedMonth} />
           </TabsContent>
 
           <TabsContent value="goals">
