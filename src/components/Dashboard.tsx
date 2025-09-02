@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Plus, Minus, TrendingUp, Target, FileText, LogOut, Download, Receipt, Calculator } from "lucide-react";
-import * as XLSX from 'xlsx';
+import { Heart, Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings } from "lucide-react";
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
@@ -11,6 +10,7 @@ import { GoalsSection } from "./GoalsSection";
 import { TransactionsSection } from "./TransactionsSection";
 import { MonthlyPlanningSection } from "./MonthlyPlanningSection";
 import { MonthNavigator } from "./MonthNavigator";
+import { SettingsSection } from "./SettingsSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -171,27 +171,6 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
-  const exportToExcel = () => {
-    const exportData = transactions.map(transaction => ({
-      'Data': new Date(transaction.date).toLocaleDateString('pt-BR'),
-      'Tipo': transaction.type === 'income' ? 'Renda' : 'Despesa',
-      'Categoria': transaction.category,
-      'Descrição': transaction.description,
-      'Valor': transaction.amount
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transações');
-    
-    const fileName = `financas_${familyName}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
-    
-    toast({
-      title: "Sucesso",
-      description: "Dados exportados com sucesso!"
-    });
-  };
 
   console.log("Dashboard rendered for:", familyName);
   
@@ -208,14 +187,9 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                 <p className="text-white/80">Olá, {familyName}!</p>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              onClick={onLogout}
-              className="text-white hover:bg-white/20"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Heart className="h-6 w-6 text-white fill-white" />
+            </div>
           </div>
         </div>
       </div>
@@ -228,7 +202,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Painel</span>
@@ -248,6 +222,10 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
             <TabsTrigger value="notes" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Anotações</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Configurações</span>
             </TabsTrigger>
           </TabsList>
 
@@ -354,15 +332,6 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                         Suas últimas movimentações financeiras
                       </CardDescription>
                     </div>
-                    <Button 
-                      onClick={exportToExcel}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center space-x-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>Exportar Excel</span>
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -421,6 +390,10 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
 
           <TabsContent value="notes">
             <NotesSection />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SettingsSection onLogout={onLogout} familyName={familyName} />
           </TabsContent>
         </Tabs>
       </div>

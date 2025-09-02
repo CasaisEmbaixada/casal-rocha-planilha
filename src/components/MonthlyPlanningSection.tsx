@@ -249,17 +249,15 @@ export const MonthlyPlanningSection = ({ selectedMonth }: MonthlyPlanningSection
                 Planeje suas receitas e despesas para este mês. Estes dados não afetam seu painel principal.
               </CardDescription>
             </div>
-            {planItems.length > 0 && (
-              <Button 
-                onClick={exportToExcel}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <Download className="h-4 w-4" />
-                <span>Exportar Excel</span>
-              </Button>
-            )}
+            <Button 
+              onClick={exportToExcel}
+              variant="outline"
+              size="sm"
+              className="flex items-center space-x-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar Excel</span>
+            </Button>
           </div>
         </CardHeader>
       </Card>

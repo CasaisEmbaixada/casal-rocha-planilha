@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Minus, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { FinanceForm } from "./FinanceForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import * as XLSX from 'xlsx';
 
 interface Transaction {
   id: string;
@@ -149,6 +150,28 @@ export const TransactionsSection = ({ selectedMonth }: TransactionsSectionProps)
   const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
 
+  const exportToExcel = () => {
+    const exportData = transactions.map(transaction => ({
+      'Data': new Date(transaction.date).toLocaleDateString('pt-BR'),
+      'Tipo': transaction.type === 'income' ? 'Renda' : 'Despesa',
+      'Categoria': transaction.category,
+      'Descrição': transaction.description,
+      'Valor': transaction.amount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Transações');
+    
+    const fileName = `transacoes_${selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(' ', '_')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    
+    toast({
+      title: "Sucesso",
+      description: "Transações exportadas com sucesso!"
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Resumo do Mês */}
@@ -228,10 +251,25 @@ export const TransactionsSection = ({ selectedMonth }: TransactionsSectionProps)
       {/* Lista de Transações */}
       <Card className="shadow-soft">
         <CardHeader>
-          <CardTitle>Transações do Mês</CardTitle>
-          <CardDescription>
-            Todas as movimentações de {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Transações do Mês</CardTitle>
+              <CardDescription>
+                Todas as movimentações de {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+              </CardDescription>
+            </div>
+            {transactions.length > 0 && (
+              <Button 
+                onClick={exportToExcel}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2"
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar Excel</span>
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
