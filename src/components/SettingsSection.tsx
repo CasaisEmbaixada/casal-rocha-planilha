@@ -202,25 +202,10 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
           {/* Avatar */}
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={profile.photo_url} />
               <AvatarFallback className="text-lg">
                 {profile.family_name.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="space-y-2">
-              <Label htmlFor="photo_url">Foto da Família</Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id="photo_url"
-                  placeholder="URL da foto"
-                  value={profile.photo_url || ''}
-                  onChange={(e) => setProfile({ ...profile, photo_url: e.target.value })}
-                />
-                <Button variant="outline" size="sm">
-                  <Camera className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
