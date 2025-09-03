@@ -19,7 +19,13 @@ interface Profile {
   full_name?: string;
   email?: string;
   whatsapp?: string;
-  address?: string;
+  street?: string;
+  house_number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  postal_code?: string;
+  state?: string;
   theme_preference: 'light' | 'dark' | 'system';
 }
 
@@ -102,7 +108,13 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
           full_name: profile.full_name,
           email: profile.email,
           whatsapp: profile.whatsapp,
-          address: profile.address,
+          street: profile.street,
+          house_number: profile.house_number,
+          complement: profile.complement,
+          neighborhood: profile.neighborhood,
+          city: profile.city,
+          postal_code: profile.postal_code,
+          state: profile.state,
           theme_preference: profile.theme_preference
         })
         .eq('id', profile.id);
@@ -248,15 +260,6 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Endereço</Label>
-            <Textarea
-              id="address"
-              placeholder="Digite seu endereço completo"
-              value={profile.address || ''}
-              onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-            />
-          </div>
 
           <Button onClick={saveProfile} disabled={saving} className="w-full">
             <Save className="h-4 w-4 mr-2" />
@@ -308,6 +311,94 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
         </CardContent>
       </Card>
 
+      {/* Informações de Endereço */}
+      <Card className="shadow-soft">
+        <CardHeader>
+          <CardTitle>Endereço</CardTitle>
+          <CardDescription>
+            Informações de localização da família
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="street">Rua</Label>
+              <Input
+                id="street"
+                placeholder="Nome da rua"
+                value={profile.street || ''}
+                onChange={(e) => setProfile({ ...profile, street: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="house_number">Número</Label>
+              <Input
+                id="house_number"
+                placeholder="123"
+                value={profile.house_number || ''}
+                onChange={(e) => setProfile({ ...profile, house_number: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="complement">Complemento</Label>
+              <Input
+                id="complement"
+                placeholder="Apto, bloco, etc."
+                value={profile.complement || ''}
+                onChange={(e) => setProfile({ ...profile, complement: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="neighborhood">Bairro</Label>
+              <Input
+                id="neighborhood"
+                placeholder="Nome do bairro"
+                value={profile.neighborhood || ''}
+                onChange={(e) => setProfile({ ...profile, neighborhood: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">Cidade</Label>
+              <Input
+                id="city"
+                placeholder="Nome da cidade"
+                value={profile.city || ''}
+                onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="postal_code">CEP</Label>
+              <Input
+                id="postal_code"
+                placeholder="00000-000"
+                value={profile.postal_code || ''}
+                onChange={(e) => setProfile({ ...profile, postal_code: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">Estado</Label>
+              <Input
+                id="state"
+                placeholder="UF"
+                value={profile.state || ''}
+                onChange={(e) => setProfile({ ...profile, state: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <Button onClick={saveProfile} disabled={saving} className="w-full">
+            <Save className="h-4 w-4 mr-2" />
+            {saving ? 'Salvando...' : 'Salvar Endereço'}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Ações da Conta */}
       <Card className="shadow-soft">
         <CardHeader>
@@ -336,10 +427,12 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta ação irá desconectar sua conta. Para excluir permanentemente sua conta
-                  e todos os dados, entre em contato com o suporte.
-                </AlertDialogDescription>
+              <AlertDialogDescription>
+                Esta ação irá desconectar sua conta. Para excluir permanentemente sua conta
+                e todos os dados, entre em contato com o suporte.
+                <br/><br/>
+                <strong>⚠️ Atenção:</strong> Ao deletar sua conta, todos os dados serão perdidos permanentemente e não há como recuperá-los.
+              </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>

@@ -5,6 +5,7 @@ import { Plus, Minus, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { FinanceForm } from "./FinanceForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PersonalizedRecommendations } from "./PersonalizedRecommendations";
 import * as XLSX from 'xlsx';
 
 interface Transaction {
@@ -149,6 +150,10 @@ export const TransactionsSection = ({ selectedMonth }: TransactionsSectionProps)
   const expenseTransactions = transactions.filter(t => t.type === 'expense');
   const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
+  
+  // Calculate percentage for recommendations
+  const transactionPercentage = totalIncome > 0 ? 
+    ((totalIncome - totalExpenses) / totalIncome) * 100 : 0;
 
   const exportToExcel = () => {
     const exportData = transactions.map(transaction => ({
@@ -220,6 +225,14 @@ export const TransactionsSection = ({ selectedMonth }: TransactionsSectionProps)
           </CardContent>
         </Card>
       </div>
+
+      {/* Recomendações Personalizadas */}
+      <PersonalizedRecommendations
+        percentage={transactionPercentage}
+        type="transactions"
+        totalIncome={totalIncome}
+        totalExpenses={totalExpenses}
+      />
 
       {/* Ações Rápidas */}
       <Card className="shadow-soft">

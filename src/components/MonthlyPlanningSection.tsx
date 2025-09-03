@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Calculator, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PersonalizedRecommendations } from "./PersonalizedRecommendations";
 import * as XLSX from 'xlsx';
 
 interface PlanItem {
@@ -209,6 +210,10 @@ export const MonthlyPlanningSection = ({ selectedMonth }: MonthlyPlanningSection
     .reduce((sum, item) => sum + item.amount, 0);
 
   const plannedBalance = totalPlannedIncome - totalPlannedExpenses;
+  
+  // Calculate percentage for recommendations
+  const plannedPercentage = totalPlannedIncome > 0 ? 
+    ((totalPlannedIncome - totalPlannedExpenses) / totalPlannedIncome) * 100 : 0;
 
   const incomeItems = planItems.filter(item => item.type === 'income');
   const expenseItems = planItems.filter(item => item.type === 'expense');
@@ -308,6 +313,14 @@ export const MonthlyPlanningSection = ({ selectedMonth }: MonthlyPlanningSection
           </CardContent>
         </Card>
       </div>
+
+      {/* Recomendações Personalizadas */}
+      <PersonalizedRecommendations
+        percentage={plannedPercentage}
+        type="planning"
+        totalIncome={totalPlannedIncome}
+        totalExpenses={totalPlannedExpenses}
+      />
 
       {/* Formulário para Adicionar Item */}
       <Card className="shadow-soft">

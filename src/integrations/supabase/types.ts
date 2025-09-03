@@ -121,39 +121,57 @@ export type Database = {
       }
       profiles: {
         Row: {
-          address: string | null
+          city: string | null
+          complement: string | null
           created_at: string
           email: string | null
           family_name: string
           full_name: string | null
+          house_number: string | null
           id: string
+          neighborhood: string | null
           photo_url: string | null
+          postal_code: string | null
+          state: string | null
+          street: string | null
           theme_preference: string | null
           updated_at: string
           user_id: string
           whatsapp: string | null
         }
         Insert: {
-          address?: string | null
+          city?: string | null
+          complement?: string | null
           created_at?: string
           email?: string | null
           family_name: string
           full_name?: string | null
+          house_number?: string | null
           id?: string
+          neighborhood?: string | null
           photo_url?: string | null
+          postal_code?: string | null
+          state?: string | null
+          street?: string | null
           theme_preference?: string | null
           updated_at?: string
           user_id: string
           whatsapp?: string | null
         }
         Update: {
-          address?: string | null
+          city?: string | null
+          complement?: string | null
           created_at?: string
           email?: string | null
           family_name?: string
           full_name?: string | null
+          house_number?: string | null
           id?: string
+          neighborhood?: string | null
           photo_url?: string | null
+          postal_code?: string | null
+          state?: string | null
+          street?: string | null
           theme_preference?: string | null
           updated_at?: string
           user_id?: string
