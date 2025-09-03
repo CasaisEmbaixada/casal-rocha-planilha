@@ -182,7 +182,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div>
-                <h1 className="text-2xl font-bold text-white">Casais na Rocha</h1>
+                <h1 className="text-2xl font-bold text-white">Casais Na Rocha</h1>
                 <p className="text-white/80">Olá, {familyName}!</p>
               </div>
             </div>
