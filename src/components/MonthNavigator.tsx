@@ -57,7 +57,7 @@ export const MonthNavigator = ({
           <Button
             variant="outline"
             className={cn(
-              "w-auto min-w-[250px] justify-center text-left font-normal",
+              "w-auto min-w-[250px] justify-center text-left font-normal hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary",
               !selectedMonth && "text-muted-foreground"
             )}
           >
