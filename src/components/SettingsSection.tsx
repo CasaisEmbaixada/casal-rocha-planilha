@@ -57,7 +57,10 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
         .eq('user_id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Database error:', error);
+        throw new Error('Erro ao carregar perfil do banco de dados');
+      }
 
       if (data) {
         setProfile({
