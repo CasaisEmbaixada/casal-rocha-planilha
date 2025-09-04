@@ -11,6 +11,7 @@ import { TransactionsSection } from "./TransactionsSection";
 import { MonthlyPlanningSection } from "./MonthlyPlanningSection";
 import { MonthNavigator } from "./MonthNavigator";
 import { SettingsSection } from "./SettingsSection";
+import { GoalForm } from "./GoalForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -32,6 +33,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const [showGoalForm, setShowGoalForm] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -302,6 +304,14 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                     <Minus className="h-4 w-4 mr-2" />
                     Adicionar Despesa
                   </Button>
+                  <Button 
+                    onClick={() => setShowGoalForm(true)}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    Criar Meta
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -410,6 +420,11 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
           onClose={() => setShowExpenseForm(false)}
         />
       )}
+
+      <GoalForm 
+        open={showGoalForm}
+        onClose={() => setShowGoalForm(false)}
+      />
     </div>
   );
 };
