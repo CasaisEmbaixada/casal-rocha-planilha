@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings, Heart } from "lucide-react";
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
@@ -188,6 +189,70 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                 <p className="text-white/80">Olá, {familyName}!</p>
               </div>
             </div>
+            
+            {/* Menu Mobile - Heart Hamburger */}
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                    <Heart className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72">
+                  <div className="flex flex-col space-y-4 mt-8">
+                    <h2 className="text-lg font-semibold mb-4">Menu</h2>
+                    <Button 
+                      variant={activeTab === "dashboard" ? "default" : "ghost"}
+                      className="justify-start space-x-3"
+                      onClick={() => setActiveTab("dashboard")}
+                    >
+                      <TrendingUp className="h-5 w-5" />
+                      <span>Painel</span>
+                    </Button>
+                    <Button 
+                      variant={activeTab === "transactions" ? "default" : "ghost"}
+                      className="justify-start space-x-3"
+                      onClick={() => setActiveTab("transactions")}
+                    >
+                      <Receipt className="h-5 w-5" />
+                      <span>Lançamentos</span>
+                    </Button>
+                    <Button 
+                      variant={activeTab === "planning" ? "default" : "ghost"}
+                      className="justify-start space-x-3"
+                      onClick={() => setActiveTab("planning")}
+                    >
+                      <Calculator className="h-5 w-5" />
+                      <span>Planejamento</span>
+                    </Button>
+                    <Button 
+                      variant={activeTab === "goals" ? "default" : "ghost"}
+                      className="justify-start space-x-3"
+                      onClick={() => setActiveTab("goals")}
+                    >
+                      <Target className="h-5 w-5" />
+                      <span>Metas</span>
+                    </Button>
+                    <Button 
+                      variant={activeTab === "notes" ? "default" : "ghost"}
+                      className="justify-start space-x-3"
+                      onClick={() => setActiveTab("notes")}
+                    >
+                      <FileText className="h-5 w-5" />
+                      <span>Anotações</span>
+                    </Button>
+                    <Button 
+                      variant={activeTab === "settings" ? "default" : "ghost"}
+                      className="justify-start space-x-3"
+                      onClick={() => setActiveTab("settings")}
+                    >
+                      <Settings className="h-5 w-5" />
+                      <span>Configurações</span>
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
@@ -200,30 +265,31 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-fit lg:grid-cols-6">
+          {/* Desktop Tabs - Hidden on Mobile */}
+          <TabsList className="hidden lg:grid w-full lg:w-fit lg:grid-cols-6">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4" />
-              <span className="hidden sm:inline">Painel</span>
+              <span>Painel</span>
             </TabsTrigger>
             <TabsTrigger value="transactions" className="flex items-center space-x-2">
               <Receipt className="h-4 w-4" />
-              <span className="hidden sm:inline">Lançamentos</span>
+              <span>Lançamentos</span>
             </TabsTrigger>
             <TabsTrigger value="planning" className="flex items-center space-x-2">
               <Calculator className="h-4 w-4" />
-              <span className="hidden sm:inline">Planejamento</span>
+              <span>Planejamento</span>
             </TabsTrigger>
             <TabsTrigger value="goals" className="flex items-center space-x-2">
               <Target className="h-4 w-4" />
-              <span className="hidden sm:inline">Metas</span>
+              <span>Metas</span>
             </TabsTrigger>
             <TabsTrigger value="notes" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Anotações</span>
+              <span>Anotações</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline">Configurações</span>
+              <span>Configurações</span>
             </TabsTrigger>
           </TabsList>
 
