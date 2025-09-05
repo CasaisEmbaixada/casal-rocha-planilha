@@ -46,7 +46,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
         </div>
         
         {/* Right Side - Login Card */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-start pl-0">
           <Card className="w-full max-w-md shadow-elegant bg-card">
             <CardHeader className="text-center space-y-4">
               <div className="flex items-center justify-center space-x-2">
