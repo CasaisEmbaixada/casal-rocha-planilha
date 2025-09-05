@@ -46,7 +46,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
         </div>
         
         {/* Right Side - Login Card */}
-        <div className="flex-1 flex items-center justify-start pl-0">
+        <div className="flex-1 flex items-center justify-center px-8">
           <Card className="w-full max-w-md shadow-elegant bg-card">
             <CardHeader className="text-center space-y-4">
               <div className="flex items-center justify-center space-x-2">
@@ -143,6 +143,34 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
+                  </div>
+                )}
+
+                {!isLoginMode && (
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-2">
+                      <input
+                        type="checkbox"
+                        id="consent"
+                        required
+                        className="mt-1 h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                      />
+                      <label htmlFor="consent" className="text-sm text-muted-foreground">
+                        Ao criar sua conta, você concorda com nossos{" "}
+                        <a href="/termos" target="_blank" className="text-primary hover:underline">
+                          Termos de Uso
+                        </a>
+                        ,{" "}
+                        <a href="/politica" target="_blank" className="text-primary hover:underline">
+                          Política de Privacidade
+                        </a>
+                        {" "}e{" "}
+                        <a href="/cookies" target="_blank" className="text-primary hover:underline">
+                          Política de Cookies
+                        </a>
+                        .
+                      </label>
+                    </div>
                   </div>
                 )}
 
@@ -293,6 +321,34 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
+                </div>
+              )}
+
+              {!isLoginMode && (
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <input
+                      type="checkbox"
+                      id="mobileConsent"
+                      required
+                      className="mt-1 h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <label htmlFor="mobileConsent" className="text-sm text-muted-foreground">
+                      Ao criar sua conta, você concorda com nossos{" "}
+                      <a href="/termos" target="_blank" className="text-primary hover:underline">
+                        Termos de Uso
+                      </a>
+                      ,{" "}
+                      <a href="/politica" target="_blank" className="text-primary hover:underline">
+                        Política de Privacidade
+                      </a>
+                      {" "}e{" "}
+                      <a href="/cookies" target="_blank" className="text-primary hover:underline">
+                        Política de Cookies
+                      </a>
+                      .
+                    </label>
+                  </div>
                 </div>
               )}
 
