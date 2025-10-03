@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Camera, Save, LogOut, Trash2, Sun, Moon, Monitor } from "lucide-react";
+import { User, Camera, Save, LogOut, Trash2, Sun, Moon, Monitor, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -38,6 +38,10 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -181,6 +185,124 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
     applyTheme(theme);
   };
 
+  const validateFile = (file: File): boolean => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Formato inválido",
+        description: "Por favor, selecione uma imagem nos formatos: JPEG, PNG, GIF ou WebP",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "O tamanho máximo permitido é 5MB",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!validateFile(file)) {
+      event.target.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+    
+    // Criar preview
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+  };
+
+  const cancelUpload = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const uploadPhoto = async () => {
+    if (!selectedFile || !profile) return;
+
+    try {
+      setUploadingPhoto(true);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Deletar foto antiga se existir
+      if (profile.photo_url) {
+        const oldPath = profile.photo_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage
+            .from('avatars')
+            .remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload da nova foto
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Atualizar perfil no banco
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ photo_url: publicUrl })
+        .eq('id', profile.id);
+
+      if (updateError) throw updateError;
+
+      // Atualizar estado local
+      setProfile({ ...profile, photo_url: publicUrl });
+      cancelUpload();
+
+      toast({
+        title: "Sucesso",
+        description: "Foto de perfil atualizada com sucesso!"
+      });
+    } catch (error: any) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: "Erro no upload",
+        description: error.message || "Não foi possível fazer upload da foto",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -214,13 +336,85 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Avatar */}
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
-              <AvatarFallback className="text-lg">
-                {profile.family_name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+          {/* Avatar com Upload */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Avatar className="h-24 w-24 sm:h-20 sm:w-20">
+                <AvatarImage 
+                  src={previewUrl || profile.photo_url || undefined} 
+                  alt="Foto de perfil"
+                />
+                <AvatarFallback className="text-lg">
+                  {profile.family_name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 w-full sm:w-auto">
+                {!selectedFile ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="photo_upload" className="text-sm">
+                      Foto de Perfil
+                    </Label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        id="photo_upload"
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        onChange={handleFileSelect}
+                        className="cursor-pointer file:cursor-pointer"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="whitespace-nowrap"
+                      >
+                        <Camera className="h-4 w-4 mr-2" />
+                        Escolher
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      JPEG, PNG, GIF ou WebP. Máx 5MB
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label className="text-sm">Preview</Label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button
+                        type="button"
+                        onClick={uploadPhoto}
+                        disabled={uploadingPhoto}
+                        className="flex-1"
+                      >
+                        {uploadingPhoto ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-background mr-2" />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Salvar Foto
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={cancelUpload}
+                        disabled={uploadingPhoto}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
