@@ -196,11 +196,11 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
                     <svg 
-                      width="24" 
-                      height="24" 
+                      width="48" 
+                      height="48" 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      className="h-6 w-6"
+                      className="h-12 w-12"
                     >
                       {/* Heart-shaped menu lines */}
                       <path 

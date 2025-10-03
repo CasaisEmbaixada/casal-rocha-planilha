@@ -3,7 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Heart, Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface LoginFormProps {
   onLogin: (email: string, password: string, familyName?: string) => void;
@@ -17,6 +20,24 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
   const [confirmPassword, setConfirmPassword] = useState("");
   const [familyName, setFamilyName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+
+  const handlePasswordReset = async () => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/`,
+      });
+      
+      if (error) throw error;
+      
+      toast.success("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+      setIsResetDialogOpen(false);
+      setResetEmail("");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao enviar e-mail de recuperação");
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,7 +203,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
+              <div className="mt-6 text-center space-y-2">
                 <Button 
                   variant="link" 
                   onClick={onToggleMode}
@@ -193,6 +214,39 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                     : "Já tem conta? Fazer login"
                   }
                 </Button>
+
+                {isLoginMode && (
+                  <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="link" className="text-sm text-muted-foreground hover:text-primary">
+                        Esqueceu sua senha?
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Recuperar Senha</DialogTitle>
+                        <DialogDescription>
+                          Digite seu e-mail para receber as instruções de recuperação de senha.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="resetEmail">E-mail</Label>
+                          <Input
+                            id="resetEmail"
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                          />
+                        </div>
+                        <Button onClick={handlePasswordReset} className="w-full">
+                          Enviar E-mail de Recuperação
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
 
               {isLoginMode && (
@@ -360,7 +414,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-2">
               <Button 
                 variant="link" 
                 onClick={onToggleMode}
@@ -371,6 +425,39 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                   : "Já tem conta? Faça login"
                 }
               </Button>
+
+              {isLoginMode && (
+                <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="text-sm text-muted-foreground hover:text-primary block mx-auto">
+                      Esqueceu sua senha?
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Recuperar Senha</DialogTitle>
+                      <DialogDescription>
+                        Digite seu e-mail para receber as instruções de recuperação de senha.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="mobileResetEmail">E-mail</Label>
+                        <Input
+                          id="mobileResetEmail"
+                          type="email"
+                          placeholder="seu@email.com"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                        />
+                      </div>
+                      <Button onClick={handlePasswordReset} className="w-full">
+                        Enviar E-mail de Recuperação
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
 
             {isLoginMode && (
