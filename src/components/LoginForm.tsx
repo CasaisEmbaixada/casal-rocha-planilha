@@ -203,7 +203,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                 </Button>
               </form>
 
-              <div className="mt-6 text-center space-y-2">
+              <div className="mt-6 text-center space-y-1">
                 <Button 
                   variant="link" 
                   onClick={onToggleMode}
@@ -259,7 +259,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                       rel="noopener noreferrer"
                       className="underline hover:text-primary"
                     >
-                      Nooma
+                      Agência nooma
                     </a>
                   </p>
                 </div>
@@ -414,7 +414,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
               </Button>
             </form>
 
-            <div className="mt-6 text-center space-y-2">
+            <div className="mt-6 text-center space-y-1">
               <Button 
                 variant="link" 
                 onClick={onToggleMode}
@@ -470,7 +470,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                     rel="noopener noreferrer"
                     className="underline hover:text-primary"
                   >
-                    Nooma
+                    Agência nooma
                   </a>
                 </p>
               </div>
