@@ -3,6 +3,11 @@ import { LoginForm } from "@/components/LoginForm";
 import { Dashboard } from "@/components/Dashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -10,6 +15,9 @@ const Index = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [familyName, setFamilyName] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   const fetchFamilyName = async (userId: string) => {
     try {
@@ -37,6 +45,10 @@ const Index = () => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (event === 'PASSWORD_RECOVERY') {
+          setShowResetPassword(true);
+        }
         
         if (session?.user) {
           // Fetch family name from profiles table
@@ -134,6 +146,33 @@ const Index = () => {
     setIsLoginMode(!isLoginMode);
   };
 
+  const handlePasswordReset = async () => {
+    if (newPassword !== confirmNewPassword) {
+      toast.error("As senhas não coincidem!");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast.success("Senha redefinida com sucesso!");
+      setShowResetPassword(false);
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao redefinir senha");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-accent to-muted flex items-center justify-center">
@@ -147,11 +186,49 @@ const Index = () => {
   }
 
   return (
-    <LoginForm 
-      onLogin={handleLogin} 
-      onToggleMode={toggleMode}
-      isLoginMode={isLoginMode}
-    />
+    <>
+      <LoginForm 
+        onLogin={handleLogin} 
+        onToggleMode={toggleMode}
+        isLoginMode={isLoginMode}
+      />
+      
+      <Dialog open={showResetPassword} onOpenChange={setShowResetPassword}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Redefinir Senha</DialogTitle>
+            <DialogDescription>
+              Digite sua nova senha abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nova Senha</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                placeholder="Digite sua nova senha"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmNewPassword">Confirmar Nova Senha</Label>
+              <Input
+                id="confirmNewPassword"
+                type="password"
+                placeholder="Confirme sua nova senha"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+              />
+            </div>
+            <Button onClick={handlePasswordReset} className="w-full">
+              Redefinir Senha
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
