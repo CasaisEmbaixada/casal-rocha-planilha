@@ -203,7 +203,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                 </Button>
               </form>
 
-              <div className="mt-6 text-center space-y-1">
+              <div className="mt-6 text-center space-y-0">
                 <Button 
                   variant="link" 
                   onClick={onToggleMode}
@@ -414,7 +414,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
               </Button>
             </form>
 
-            <div className="mt-6 text-center space-y-1">
+            <div className="mt-6 text-center space-y-0">
               <Button 
                 variant="link" 
                 onClick={onToggleMode}
