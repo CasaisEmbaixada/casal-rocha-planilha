@@ -82,7 +82,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                   className="h-12 w-auto object-contain"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <CardTitle className="text-xl text-foreground">
                   {isLoginMode ? "Entrar na sua conta" : "Crie sua conta"}
                 </CardTitle>
@@ -203,7 +203,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                 </Button>
               </form>
 
-              <div className="mt-6 text-center space-y-0">
+              <div className="mt-6 text-center space-y-2">
                 <Button 
                   variant="link" 
                   onClick={onToggleMode}
@@ -296,7 +296,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
                 className="h-12 w-auto object-contain"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <CardTitle className="text-xl text-foreground">
                 {isLoginMode ? "Acesse suas finanças" : "Crie sua conta"}
               </CardTitle>
@@ -414,7 +414,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
               </Button>
             </form>
 
-            <div className="mt-6 text-center space-y-0">
+            <div className="mt-6 text-center space-y-2">
               <Button 
                 variant="link" 
                 onClick={onToggleMode}
