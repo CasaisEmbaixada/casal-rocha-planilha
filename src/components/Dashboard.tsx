@@ -194,13 +194,13 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
             <div className="lg:hidden">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white hover:text-primary p-0">
                     <svg 
-                      width="48" 
-                      height="48" 
+                      width="96" 
+                      height="96" 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      className="h-12 w-12"
+                      className="h-24 w-24"
                     >
                       {/* Heart-shaped menu lines */}
                       <path 
@@ -216,57 +216,51 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                     </svg>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-72">
-                  <div className="flex flex-col space-y-4 mt-8">
-                    <h2 className="text-lg font-semibold mb-4">Menu</h2>
-                    <Button 
-                      variant={activeTab === "dashboard" ? "default" : "ghost"}
-                      className="justify-start space-x-3"
+                <SheetContent side="right" className="w-80">
+                  <div className="flex flex-col space-y-6 mt-8">
+                    <h2 className="text-2xl font-semibold mb-4">Menu</h2>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
                       onClick={() => setActiveTab("dashboard")}
                     >
-                      <TrendingUp className="h-5 w-5" />
-                      <span>Painel</span>
-                    </Button>
-                    <Button 
-                      variant={activeTab === "transactions" ? "default" : "ghost"}
-                      className="justify-start space-x-3"
+                      <TrendingUp className="h-8 w-8" />
+                      <span className="text-xl">Painel</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
                       onClick={() => setActiveTab("transactions")}
                     >
-                      <Receipt className="h-5 w-5" />
-                      <span>Lançamentos</span>
-                    </Button>
-                    <Button 
-                      variant={activeTab === "planning" ? "default" : "ghost"}
-                      className="justify-start space-x-3"
+                      <Receipt className="h-8 w-8" />
+                      <span className="text-xl">Lançamentos</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
                       onClick={() => setActiveTab("planning")}
                     >
-                      <Calculator className="h-5 w-5" />
-                      <span>Planejamento</span>
-                    </Button>
-                    <Button 
-                      variant={activeTab === "goals" ? "default" : "ghost"}
-                      className="justify-start space-x-3"
+                      <Calculator className="h-8 w-8" />
+                      <span className="text-xl">Planejamento</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
                       onClick={() => setActiveTab("goals")}
                     >
-                      <Target className="h-5 w-5" />
-                      <span>Metas</span>
-                    </Button>
-                    <Button 
-                      variant={activeTab === "notes" ? "default" : "ghost"}
-                      className="justify-start space-x-3"
+                      <Target className="h-8 w-8" />
+                      <span className="text-xl">Metas</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
                       onClick={() => setActiveTab("notes")}
                     >
-                      <FileText className="h-5 w-5" />
-                      <span>Anotações</span>
-                    </Button>
-                    <Button 
-                      variant={activeTab === "settings" ? "default" : "ghost"}
-                      className="justify-start space-x-3"
+                      <FileText className="h-8 w-8" />
+                      <span className="text-xl">Anotações</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
                       onClick={() => setActiveTab("settings")}
                     >
-                      <Settings className="h-5 w-5" />
-                      <span>Configurações</span>
-                    </Button>
+                      <Settings className="h-8 w-8" />
+                      <span className="text-xl">Configurações</span>
+                    </button>
                   </div>
                 </SheetContent>
               </Sheet>
