@@ -1,19 +1,31 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Save, Edit3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Edit3, Trash2, StickyNote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+interface Note {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const NotesSection = () => {
-  const [notes, setNotes] = useState("");
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [noteId, setNoteId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [noteTitle, setNoteTitle] = useState("");
+  const [noteContent, setNoteContent] = useState("");
+  const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Carrega as notas do Supabase ao montar o componente
   useEffect(() => {
     loadNotes();
   }, []);
@@ -23,37 +35,31 @@ export const NotesSection = () => {
       const { data, error } = await supabase
         .from('notes')
         .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .order('updated_at', { ascending: false });
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('Error loading notes:', error);
-        return;
-      }
+      if (error) throw error;
 
-      if (data) {
-        setNotes(data.content || '');
-        setNoteId(data.id);
-        setLastSaved(new Date(data.updated_at));
-      }
+      setNotes(data || []);
     } catch (error) {
       console.error('Error loading notes:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as anotações",
+        variant: "destructive"
+      });
     }
   };
 
-  // Auto-save das notas
-  useEffect(() => {
-    if (isEditing) {
-      const timeoutId = setTimeout(() => {
-        saveNotes();
-      }, 2000); // Salva após 2 segundos de inatividade
-
-      return () => clearTimeout(timeoutId);
+  const handleSaveNote = async () => {
+    if (!noteTitle.trim()) {
+      toast({
+        title: "Erro",
+        description: "O título não pode estar vazio",
+        variant: "destructive"
+      });
+      return;
     }
-  }, [notes, isEditing]);
 
-  const saveNotes = async () => {
     try {
       const user = await supabase.auth.getUser();
       if (!user.data.user) {
@@ -65,52 +71,101 @@ export const NotesSection = () => {
         return;
       }
 
-      if (noteId) {
+      if (editingNote) {
         // Atualiza nota existente
         const { error } = await supabase
           .from('notes')
           .update({
-            content: notes,
+            title: noteTitle,
+            content: noteContent,
             updated_at: new Date().toISOString()
           })
-          .eq('id', noteId);
+          .eq('id', editingNote.id);
 
         if (error) throw error;
+
+        toast({
+          title: "Sucesso",
+          description: "Anotação atualizada com sucesso"
+        });
       } else {
         // Cria nova nota
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('notes')
           .insert({
             user_id: user.data.user.id,
-            title: 'Anotações Financeiras',
-            content: notes
-          })
-          .select()
-          .single();
+            title: noteTitle,
+            content: noteContent
+          });
 
         if (error) throw error;
-        setNoteId(data.id);
+
+        toast({
+          title: "Sucesso",
+          description: "Anotação criada com sucesso"
+        });
       }
 
-      setLastSaved(new Date());
-      setIsEditing(false);
+      setIsDialogOpen(false);
+      setEditingNote(null);
+      setNoteTitle("");
+      setNoteContent("");
+      loadNotes();
     } catch (error: any) {
-      console.error('Error saving notes:', error);
+      console.error('Error saving note:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar as anotações",
+        description: "Não foi possível salvar a anotação",
         variant: "destructive"
       });
     }
   };
 
-  const handleNotesChange = (value: string) => {
-    setNotes(value);
-    setIsEditing(true);
+  const handleEditNote = (note: Note) => {
+    setEditingNote(note);
+    setNoteTitle(note.title);
+    setNoteContent(note.content);
+    setIsDialogOpen(true);
   };
 
-  const formatLastSaved = (date: Date) => {
-    return date.toLocaleString('pt-BR', {
+  const handleDeleteNote = async () => {
+    if (!deleteNoteId) return;
+
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', deleteNoteId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Anotação excluída com sucesso"
+      });
+
+      setDeleteNoteId(null);
+      loadNotes();
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a anotação",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleNewNote = () => {
+    setEditingNote(null);
+    setNoteTitle("");
+    setNoteContent("");
+    setIsDialogOpen(true);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -126,46 +181,141 @@ export const NotesSection = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center space-x-2">
-                <Edit3 className="h-5 w-5 text-primary" />
-                <span>Nossas Anotações Financeiras</span>
+                <StickyNote className="h-5 w-5 text-primary" />
+                <span>Bloco de Anotações</span>
               </CardTitle>
               <CardDescription>
-                Use este espaço para registrar decisões importantes, ideias e insights sobre suas finanças
+                Gerencie suas anotações financeiras
               </CardDescription>
             </div>
-            <div className="flex items-center space-x-2">
-              {isEditing ? (
-                <Badge variant="secondary" className="text-xs">
-                  <Edit3 className="h-3 w-3 mr-1" />
-                  Editando...
-                </Badge>
-              ) : lastSaved ? (
-                <Badge variant="outline" className="text-xs">
-                  <Save className="h-3 w-3 mr-1" />
-                  Salvo
-                </Badge>
-              ) : null}
-            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={handleNewNote} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Anotação
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingNote ? "Editar Anotação" : "Nova Anotação"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingNote ? "Edite sua anotação" : "Crie uma nova anotação"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label htmlFor="title" className="text-sm font-medium">
+                      Título
+                    </label>
+                    <Input
+                      id="title"
+                      placeholder="Ex: Planejamento de Férias"
+                      value={noteTitle}
+                      onChange={(e) => setNoteTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="content" className="text-sm font-medium">
+                      Conteúdo
+                    </label>
+                    <Textarea
+                      id="content"
+                      placeholder="Digite o conteúdo da sua anotação..."
+                      value={noteContent}
+                      onChange={(e) => setNoteContent(e.target.value)}
+                      className="min-h-[200px]"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsDialogOpen(false);
+                      setEditingNote(null);
+                      setNoteTitle("");
+                      setNoteContent("");
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSaveNote}>
+                    Salvar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="Digite aqui suas reflexões sobre finanças, decisões importantes que tomaram como casal, metas alcançadas, insights das sessões do curso, ideias para otimizar o orçamento..."
-              value={notes}
-              onChange={(e) => handleNotesChange(e.target.value)}
-              className="min-h-[300px] resize-none"
-            />
-            
-            {lastSaved && (
-              <p className="text-xs text-muted-foreground flex items-center space-x-1">
-                <Save className="h-3 w-3" />
-                <span>Última atualização: {formatLastSaved(lastSaved)}</span>
-              </p>
-            )}
-          </div>
+          {notes.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <StickyNote className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <p>Nenhuma anotação criada ainda.</p>
+              <p className="text-sm">Clique em "Nova Anotação" para começar.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {notes.map((note) => (
+                <Card key={note.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-base font-semibold line-clamp-1">
+                        {note.title}
+                      </CardTitle>
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleEditNote(note)}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteNoteId(note.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <CardDescription className="text-xs">
+                      {formatDate(note.updated_at)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-4 whitespace-pre-wrap">
+                      {note.content || "Sem conteúdo"}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!deleteNoteId} onOpenChange={() => setDeleteNoteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta anotação? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteNote} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Dicas para uso das anotações */}
       <Card className="border-accent bg-accent/20">
