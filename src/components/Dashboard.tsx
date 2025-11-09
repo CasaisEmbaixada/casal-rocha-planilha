@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings, Heart, LogOut } from "lucide-react";
+import { Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings, Heart, LogOut, HelpCircle, GraduationCap, Info } from "lucide-react";
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
@@ -15,6 +15,7 @@ import { SettingsSection } from "./SettingsSection";
 import { GoalForm } from "./GoalForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Transaction {
   id: string;
@@ -40,6 +41,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [accumulatedBalance, setAccumulatedBalance] = useState(0);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadTransactions();
@@ -253,6 +255,27 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                     >
                       <FileText className="h-8 w-8" />
                       <span className="text-xl">Anotações</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      onClick={() => navigate("/ajuda")}
+                    >
+                      <HelpCircle className="h-8 w-8" />
+                      <span className="text-xl">Ajuda</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      onClick={() => navigate("/tutorial")}
+                    >
+                      <GraduationCap className="h-8 w-8" />
+                      <span className="text-xl">Tutorial</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      onClick={() => navigate("/sobre")}
+                    >
+                      <Info className="h-8 w-8" />
+                      <span className="text-xl">Sobre</span>
                     </button>
                     <button 
                       className="flex items-center space-x-4 text-left py-2 text-foreground"
