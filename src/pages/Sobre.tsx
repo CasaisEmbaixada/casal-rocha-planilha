@@ -200,7 +200,7 @@ export const Sobre = () => {
           <CardContent className="space-y-3">
             <div className="text-sm">
               <p className="text-muted-foreground mb-1">Email:</p>
-              <p className="font-medium">contato@casaisnarocha.com.br</p>
+              <p className="font-medium">casais@embaixadadoreino.com</p>
             </div>
             <div className="text-sm">
               <p className="text-muted-foreground mb-1">Redes Sociais:</p>
