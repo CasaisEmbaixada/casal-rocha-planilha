@@ -194,13 +194,13 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
             <div className="lg:hidden">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white hover:text-primary p-0">
+                  <button className="text-white p-2">
                     <svg 
-                      width="96" 
-                      height="96" 
+                      width="80" 
+                      height="80" 
                       viewBox="0 0 24 24" 
                       fill="none" 
-                      className="h-24 w-24"
+                      className="h-20 w-20"
                     >
                       {/* Heart-shaped menu lines */}
                       <path 
@@ -214,7 +214,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                       <line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                       <line x1="10" y1="15" x2="14" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
-                  </Button>
+                  </button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-6 mt-8">
