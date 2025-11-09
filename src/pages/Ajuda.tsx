@@ -129,7 +129,7 @@ export const Ajuda = () => {
                 Envie um email com sua dúvida ou sugestão para nossa equipe.
               </p>
               <Button variant="outline" className="w-full">
-                suporte@casaisnarocha.com.br
+                casais@embaixadadoreino.com
               </Button>
             </CardContent>
           </Card>
