@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings, Heart } from "lucide-react";
+import { Plus, Minus, TrendingUp, Target, FileText, Receipt, Calculator, Settings, Heart, LogOut } from "lucide-react";
 import { FinanceForm } from "./FinanceForm";
 import { FinanceChart } from "./FinanceChart";
 import { NotesSection } from "./NotesSection";
@@ -260,6 +260,13 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                     >
                       <Settings className="h-8 w-8" />
                       <span className="text-xl">Configurações</span>
+                    </button>
+                    <button 
+                      className="flex items-center space-x-4 text-left py-2 text-destructive"
+                      onClick={onLogout}
+                    >
+                      <LogOut className="h-8 w-8" />
+                      <span className="text-xl">Sair do app</span>
                     </button>
                   </div>
                 </SheetContent>
