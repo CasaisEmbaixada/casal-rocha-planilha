@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Camera, Save, LogOut, Trash2, Sun, Moon, Monitor, Upload, X, GraduationCap } from "lucide-react";
+import { User, Camera, Save, LogOut, Trash2, Sun, Moon, Monitor, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,10 +32,9 @@ interface Profile {
 interface SettingsSectionProps {
   onLogout: () => void;
   familyName?: string;
-  onRestartTour?: () => void;
 }
 
-export const SettingsSection = ({ onLogout, familyName = "Família", onRestartTour }: SettingsSectionProps) => {
+export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsSectionProps) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -606,17 +605,6 @@ export const SettingsSection = ({ onLogout, familyName = "Família", onRestartTo
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {onRestartTour && (
-            <Button 
-              onClick={onRestartTour}
-              variant="secondary"
-              className="w-full"
-            >
-              <GraduationCap className="h-4 w-4 mr-2" />
-              Reiniciar Tour Guiado
-            </Button>
-          )}
-          
           <Button 
             onClick={onLogout}
             variant="outline"

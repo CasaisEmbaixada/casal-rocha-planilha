@@ -13,7 +13,6 @@ import { MonthlyPlanningSection } from "./MonthlyPlanningSection";
 import { MonthNavigator } from "./MonthNavigator";
 import { SettingsSection } from "./SettingsSection";
 import { GoalForm } from "./GoalForm";
-import { InteractiveTour } from "./InteractiveTour";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -41,17 +40,8 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   const [loading, setLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [accumulatedBalance, setAccumulatedBalance] = useState(0);
-  const [showTour, setShowTour] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const hasSeenTour = localStorage.getItem('hasSeenTour');
-    if (!hasSeenTour) {
-      // Delay to ensure DOM is ready
-      setTimeout(() => setShowTour(true), 1000);
-    }
-  }, []);
 
   useEffect(() => {
     loadTransactions();
@@ -187,30 +177,12 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
     .slice(0, 5);
 
 
-  const handleTourComplete = () => {
-    localStorage.setItem('hasSeenTour', 'true');
-    setShowTour(false);
-    toast({
-      title: "Tour concluído!",
-      description: "Agora você está pronto para começar a usar o app."
-    });
-  };
-
-  const handleTourSkip = () => {
-    localStorage.setItem('hasSeenTour', 'true');
-    setShowTour(false);
-  };
-
-  const restartTour = () => {
-    setShowTour(true);
-  };
-
   console.log("Dashboard rendered for:", familyName);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-muted">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-primary-dark shadow-soft" data-tour="welcome">
+      <div className="bg-gradient-to-r from-primary to-primary-dark shadow-soft">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -329,12 +301,10 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
 
       <div className="container mx-auto px-4 py-8">
         {/* Navegador de Mês */}
-        <div data-tour="month-nav">
-          <MonthNavigator 
-            selectedMonth={selectedMonth} 
-            onMonthChange={setSelectedMonth}
-          />
-        </div>
+        <MonthNavigator 
+          selectedMonth={selectedMonth} 
+          onMonthChange={setSelectedMonth}
+        />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Desktop Tabs - Hidden on Mobile */}
@@ -385,7 +355,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
 
           <TabsContent value="dashboard" className="space-y-6">
             {/* Resumo Financeiro */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6" data-tour="summary">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="shadow-soft">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -437,7 +407,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Ações Rápidas */}
-              <Card className="shadow-soft" data-tour="add-transaction">
+              <Card className="shadow-soft">
                 <CardHeader>
                   <CardTitle>Ações Rápidas</CardTitle>
                   <CardDescription>
@@ -485,7 +455,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
               </Card>
 
               {/* Transações Recentes */}
-              <Card className="shadow-soft lg:col-span-2" data-tour="transactions">
+              <Card className="shadow-soft lg:col-span-2">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
@@ -543,27 +513,19 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
           </TabsContent>
 
           <TabsContent value="planning">
-            <div data-tour="planning">
-              <MonthlyPlanningSection selectedMonth={selectedMonth} />
-            </div>
+            <MonthlyPlanningSection selectedMonth={selectedMonth} />
           </TabsContent>
 
           <TabsContent value="goals">
-            <div data-tour="goals">
-              <GoalsSection />
-            </div>
+            <GoalsSection />
           </TabsContent>
 
           <TabsContent value="notes">
-            <div data-tour="notes">
-              <NotesSection />
-            </div>
+            <NotesSection />
           </TabsContent>
 
           <TabsContent value="settings">
-            <div data-tour="settings">
-              <SettingsSection onLogout={onLogout} familyName={familyName} onRestartTour={restartTour} />
-            </div>
+            <SettingsSection onLogout={onLogout} familyName={familyName} />
           </TabsContent>
         </Tabs>
       </div>
@@ -589,14 +551,6 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
         open={showGoalForm}
         onClose={() => setShowGoalForm(false)}
       />
-
-      {/* Interactive Tour */}
-      {showTour && (
-        <InteractiveTour 
-          onComplete={handleTourComplete}
-          onSkip={handleTourSkip}
-        />
-      )}
     </div>
   );
 };
