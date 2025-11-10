@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, HelpCircle, MessageCircle, Mail } from "lucide-react";
+import { ArrowLeft, HelpCircle, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const Ajuda = () => {
@@ -99,41 +99,22 @@ export const Ajuda = () => {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
-                Suporte via Chat
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Tem alguma dúvida que não foi respondida aqui? Entre em contato conosco.
-              </p>
-              <Button className="w-full">
-                Iniciar Chat
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-soft">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Email de Suporte
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Envie um email com sua dúvida ou sugestão para nossa equipe.
-              </p>
-              <Button variant="outline" className="w-full">
-                casais@embaixadadoreino.com
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Email de Suporte
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Tem alguma dúvida que não foi respondida aqui? Envie um email com sua dúvida ou sugestão para nossa equipe.
+            </p>
+            <Button variant="outline" className="w-full">
+              casais@embaixadadoreino.com
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

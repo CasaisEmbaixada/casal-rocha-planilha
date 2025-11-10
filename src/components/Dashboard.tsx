@@ -218,78 +218,78 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
                     </svg>
                   </button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-80">
-                  <div className="flex flex-col space-y-6 mt-8">
-                    <h2 className="text-2xl font-semibold mb-4">Menu</h2>
+                <SheetContent side="right" className="w-80 overflow-y-auto">
+                  <div className="flex flex-col space-y-3 mt-8 pb-8">
+                    <h2 className="text-2xl font-semibold mb-2">Menu</h2>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => setActiveTab("dashboard")}
                     >
-                      <TrendingUp className="h-8 w-8" />
-                      <span className="text-xl">Painel</span>
+                      <TrendingUp className="h-6 w-6" />
+                      <span className="text-lg">Painel</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => setActiveTab("transactions")}
                     >
-                      <Receipt className="h-8 w-8" />
-                      <span className="text-xl">Lançamentos</span>
+                      <Receipt className="h-6 w-6" />
+                      <span className="text-lg">Lançamentos</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => setActiveTab("planning")}
                     >
-                      <Calculator className="h-8 w-8" />
-                      <span className="text-xl">Planejamento</span>
+                      <Calculator className="h-6 w-6" />
+                      <span className="text-lg">Planejamento</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => setActiveTab("goals")}
                     >
-                      <Target className="h-8 w-8" />
-                      <span className="text-xl">Metas</span>
+                      <Target className="h-6 w-6" />
+                      <span className="text-lg">Metas</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => setActiveTab("notes")}
                     >
-                      <FileText className="h-8 w-8" />
-                      <span className="text-xl">Anotações</span>
+                      <FileText className="h-6 w-6" />
+                      <span className="text-lg">Anotações</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => navigate("/ajuda")}
                     >
-                      <HelpCircle className="h-8 w-8" />
-                      <span className="text-xl">Ajuda</span>
+                      <HelpCircle className="h-6 w-6" />
+                      <span className="text-lg">Ajuda</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => navigate("/tutorial")}
                     >
-                      <GraduationCap className="h-8 w-8" />
-                      <span className="text-xl">Tutorial</span>
+                      <GraduationCap className="h-6 w-6" />
+                      <span className="text-lg">Tutorial</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => navigate("/sobre")}
                     >
-                      <Info className="h-8 w-8" />
-                      <span className="text-xl">Sobre</span>
+                      <Info className="h-6 w-6" />
+                      <span className="text-lg">Sobre</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-foreground"
+                      className="flex items-center space-x-4 text-left py-1.5 text-foreground"
                       onClick={() => setActiveTab("settings")}
                     >
-                      <Settings className="h-8 w-8" />
-                      <span className="text-xl">Configurações</span>
+                      <Settings className="h-6 w-6" />
+                      <span className="text-lg">Configurações</span>
                     </button>
                     <button 
-                      className="flex items-center space-x-4 text-left py-2 text-destructive"
+                      className="flex items-center space-x-4 text-left py-1.5 text-destructive"
                       onClick={onLogout}
                     >
-                      <LogOut className="h-8 w-8" />
-                      <span className="text-xl">Sair do app</span>
+                      <LogOut className="h-6 w-6" />
+                      <span className="text-lg">Sair do app</span>
                     </button>
                   </div>
                 </SheetContent>
@@ -308,7 +308,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* Desktop Tabs - Hidden on Mobile */}
-          <TabsList className="hidden lg:grid w-full lg:w-fit lg:grid-cols-6">
+          <TabsList className="hidden lg:grid w-full lg:w-fit lg:grid-cols-9 gap-2">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2">
               <TrendingUp className="h-4 w-4" />
               <span>Painel</span>
@@ -328,6 +328,24 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
             <TabsTrigger value="notes" className="flex items-center space-x-2">
               <FileText className="h-4 w-4" />
               <span>Anotações</span>
+            </TabsTrigger>
+            <TabsTrigger value="ajuda" asChild>
+              <button onClick={() => navigate("/ajuda")} className="flex items-center space-x-2">
+                <HelpCircle className="h-4 w-4" />
+                <span>Ajuda</span>
+              </button>
+            </TabsTrigger>
+            <TabsTrigger value="tutorial" asChild>
+              <button onClick={() => navigate("/tutorial")} className="flex items-center space-x-2">
+                <GraduationCap className="h-4 w-4" />
+                <span>Tutorial</span>
+              </button>
+            </TabsTrigger>
+            <TabsTrigger value="sobre" asChild>
+              <button onClick={() => navigate("/sobre")} className="flex items-center space-x-2">
+                <Info className="h-4 w-4" />
+                <span>Sobre</span>
+              </button>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Settings className="h-4 w-4" />
