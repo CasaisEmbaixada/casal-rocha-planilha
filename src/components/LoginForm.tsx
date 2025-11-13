@@ -58,7 +58,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
         <div className="flex-1 relative flex items-center justify-center bg-gradient-to-br from-accent/30 to-muted/50 min-h-screen">
           <div className="absolute inset-0 flex items-center justify-center">
             <img 
-              src="/lovable-uploads/0022408e-8418-4498-9739-41e9ef3cd7f7.png" 
+              src="/lovable-uploads/couple-hero.png" 
               alt="Casal gerenciando finanças juntos" 
               className="w-full h-full object-cover rounded-none shadow-elegant"
             />
@@ -274,7 +274,7 @@ export const LoginForm = ({ onLogin, onToggleMode, isLoginMode }: LoginFormProps
         {/* Background Hero Image */}
         <div className="absolute inset-0">
           <img 
-            src="/lovable-uploads/0022408e-8418-4498-9739-41e9ef3cd7f7.png" 
+            src="/lovable-uploads/couple-hero.png" 
             alt="Casal gerenciando finanças juntos" 
             className="w-full h-full object-cover opacity-20"
           />
