@@ -13,6 +13,7 @@ import { MonthlyPlanningSection } from "./MonthlyPlanningSection";
 import { MonthNavigator } from "./MonthNavigator";
 import { SettingsSection } from "./SettingsSection";
 import { GoalForm } from "./GoalForm";
+import { InstallPWAPrompt } from "./InstallPWAPrompt";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -180,8 +181,12 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
   console.log("Dashboard rendered for:", familyName);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-muted">
-      {/* Header */}
+    <>
+      {/* PWA Install Prompt */}
+      <InstallPWAPrompt />
+      
+      <div className="min-h-screen bg-gradient-to-br from-accent to-muted">
+        {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary-dark shadow-soft">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -551,6 +556,7 @@ export const Dashboard = ({ onLogout, familyName = "Família" }: DashboardProps)
         open={showGoalForm}
         onClose={() => setShowGoalForm(false)}
       />
-    </div>
+      </div>
+    </>
   );
 };
