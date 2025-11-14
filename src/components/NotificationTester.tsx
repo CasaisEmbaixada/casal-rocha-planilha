@@ -4,11 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Send, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export const NotificationTester = () => {
+  const { isAdmin, loading: adminLoading } = useIsAdmin();
   const [title, setTitle] = useState("Nova Atualização Disponível! 🎉");
   const [body, setBody] = useState("O aplicativo foi atualizado com novas funcionalidades.");
   const [sending, setSending] = useState(false);
@@ -18,6 +20,16 @@ export const NotificationTester = () => {
     try {
       setSending(true);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar autenticado para enviar notificações.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('send-push-notification', {
         body: {
           title,
@@ -25,6 +37,9 @@ export const NotificationTester = () => {
           icon: '/pwa-192x192.png',
           url: '/',
           type: 'update'
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
@@ -48,15 +63,23 @@ export const NotificationTester = () => {
     }
   };
 
+  if (adminLoading) {
+    return null;
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
-    <Card>
+    <Card className="border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Send className="h-5 w-5" />
-          Enviar Notificação (Teste)
+          <Shield className="h-5 w-5 text-primary" />
+          Enviar Notificação (Admin)
         </CardTitle>
         <CardDescription>
-          Envie uma notificação de teste para todos os usuários inscritos
+          Envie uma notificação push para todos os usuários inscritos. Apenas administradores podem usar esta função.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
