@@ -10,6 +10,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { User, Camera, Save, LogOut, Trash2, Sun, Moon, Monitor, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { PushNotifications } from "./PushNotifications";
+import { NotificationTester } from "./NotificationTester";
 
 interface Profile {
   id: string;
@@ -507,6 +509,12 @@ export const SettingsSection = ({ onLogout, familyName = "Família" }: SettingsS
           </div>
         </CardContent>
       </Card>
+
+      {/* Notificações Push */}
+      <PushNotifications />
+
+      {/* Enviar Notificação de Teste */}
+      <NotificationTester />
 
       {/* Informações de Endereço */}
       <Card className="shadow-soft">
